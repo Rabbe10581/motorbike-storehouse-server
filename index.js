@@ -21,6 +21,7 @@ async function run() {
     try {
         const bikeCollection = client.db('bikeResale').collection('categories');
         const usersCollection = client.db('bikeResale').collection('users');
+        const ordersCollection = client.db('bikeResale').collection('orders');
 
         app.get('/categories', async (req, res) => {
             const query = {}
@@ -29,13 +30,6 @@ async function run() {
             res.send(categories);
         })
 
-
-        // app.get('/categories/:id', (req, res) => {
-        //     console.log(req.params);
-        //     const id = req.params.id;
-        //     const deta = details.find(d => d.id == id)
-        //     res.send(deta);
-        // })
 
         app.get('/categories/:id', async (req, res) => {
             const id = req.params.id;
@@ -51,6 +45,20 @@ async function run() {
             res.send(result);
             console.log(result);
         })
+
+        //orders post
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            console.log(order);
+            const query = {
+                appointmentDate: order.appointmentDate,
+                email: order.email,
+                treatment: order.treatment
+            }
+            const alreadyBooked = await ordersCollection.find(query).toArray();
+            const result = await ordersCollection.insertOne(order);
+            res.send(result);
+        });
     }
     finally {
 
