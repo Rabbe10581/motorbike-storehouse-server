@@ -32,11 +32,14 @@ async function run() {
         })
 
 
-        app.get('/categories/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const products = await bikeCollection.findOne(query);
-            res.send(products);
+        app.get('/categories/:brandName', async (req, res) => {
+            const brandName = req.params.brandName;
+            console.log(brandName);
+            const query = { brandName: brandName };
+            const category = await bikeCollection.findOne(query);
+            const products = await productsCollection.find(query).toArray();
+            console.log(products);
+            res.send([...category.products, ...products]);
         });
 
         //Users Post
@@ -45,6 +48,13 @@ async function run() {
             const result = await usersCollection.insertOne(user);
             res.send(result);
             console.log(result);
+        })
+
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const foundEmail = await usersCollection.findOne({ email });
+            console.log(foundEmail);
+            res.send(foundEmail);
         })
 
         //orders post
@@ -76,11 +86,59 @@ async function run() {
             res.send(orders);
         })
 
-        //
+        // Post Products
         app.post('/products', async (req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
             res.send(result);
+        });
+
+        app.get('/products', async (req, res) => {
+            let query = {};
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor = productsCollection.find(query);
+            const products = await cursor.toArray();
+            res.send(products);
+        });
+
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        app.put('/advertise/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    advertisement: 'Okay'
+                }
+            }
+            const result = await productsCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+
+        //Getting all products
+        app.get('/allproducts', async (req, res) => {
+            const query = {};
+            const allProducts = await productsCollection.find(query).toArray();
+            res.send(allProducts);
+        });
+
+        app.get('/anik', async (req, res) => {
+            let query = {
+                advertisement: 'Okay'
+            }
+            const cursor = productsCollection.find(query);
+            const advertisedproducts = await cursor.toArray();
+            res.send(advertisedproducts);
         });
 
 
