@@ -22,6 +22,7 @@ async function run() {
         const bikeCollection = client.db('bikeResale').collection('categories');
         const usersCollection = client.db('bikeResale').collection('users');
         const ordersCollection = client.db('bikeResale').collection('orders');
+        const productsCollection = client.db('bikeResale').collection('addedProducts');
 
         app.get('/categories', async (req, res) => {
             const query = {}
@@ -60,7 +61,7 @@ async function run() {
             res.send(result);
         });
 
-        //
+        // get Orders
         app.get('/orders', async (req, res) => {
             const email = req.query.email;
             const query = { email: email };
@@ -74,6 +75,14 @@ async function run() {
             const orders = await ordersCollection.findOne(query);
             res.send(orders);
         })
+
+        //
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
+            res.send(result);
+        });
+
 
     }
     finally {
